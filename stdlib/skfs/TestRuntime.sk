@@ -1,0 +1,142 @@
+module SKFSTest;
+
+class MyEx(value: Int) extends Exception
+
+fun makeExn(): Int {
+  throw MyEx(22);
+}
+
+@cpp_extern("SKIP_SKFSTest_Obstack")
+native fun testObstack<T: frozen>(T): void;
+
+value class Foo(X, X, Int)
+
+class X(Int, Int) extends SKFS.File
+class T(Int, X) extends SKFS.File
+class Y(X, Int) extends SKFS.File
+class Z(Foo, Foo) extends SKFS.File
+
+fun makeX(x: Int): X {
+  X(x, x)
+}
+
+fun makeY(x: Int): Y {
+  Y(X(x, x), x)
+}
+
+fun makeZ(n: Int): Z {
+  x = X(n, n);
+  Z(Foo(x, x, 22), Foo(x, x, 22))
+}
+
+fun makeT(x: Int): T {
+  T(x + 1, makeX(x))
+}
+
+@cpp_extern
+base class CObject
+
+@cpp_extern("SKIP_make_C_object")
+native fun makeCObject(): CObject;
+
+@cpp_extern("SKIP_is_C_object")
+native fun isCObject(CObject): UInt32;
+
+class CObjectContainer(i0: CObject, i1: Array<CObject>)
+
+fun testRuntime(): mutable SKFS.Context {
+  chars = Array['a', 'b', 'c'];
+  expectEq("String::replace", "xbc", () ->
+    String::fromChars(chars).replace("a", "x")
+  );
+  str = "abc";
+  str2 = "123";
+  expectEq("String GT", (GT() : Order), () -> str.compare(str2));
+  expectEq("String LT", (EQ() : Order), () -> str.compare("abc"));
+  expectEq("String LT", (LT() : Order), () -> str2.compare(str));
+  expectEq("String.concat2", "abc123", () -> str + str2);
+  expectEq("String.byteSize", 3, () -> String.byteSize(str).toInt());
+  expectEq("throw", 22, () -> {
+    vtry(
+      () -> makeExn(),
+      exn -> {
+        exn match {
+        | MyEx(x) -> x
+        | e -> throw e
+        }
+      },
+    )
+  });
+  arr = Array[Array[1], Array[2], Array[3]];
+  expectEq("getArraySize", 3, () -> getArraySize(arr));
+  expectEq("hash", 2147580002, () -> str.hash());
+  expectEq("String.getByte", 'b'.code(), () -> String.getByte(str, 1).toInt());
+  expectEq("substring", "c", () -> {
+    iter = str.getIter();
+    str.substring(iter.drop(2));
+  });
+  expectEq("ArrayEach", 6, () -> {
+    result = 0;
+    Array[1, 2, 3].each(x -> !result = result + x);
+    result
+  });
+  expectEq("Native Eq 1", 0, () -> {
+    native_eq(Array[1, 2, 3], Array[1, 2, 3]);
+  });
+  expectEq("Native Eq 2", 1, () -> {
+    native_eq(Array[1, 2, 3], Array[1, 2, 4]);
+  });
+  expectEq("Native Eq 3", 1, () -> {
+    native_eq(Array[1, 2, 4], Array[1, 2, 3]);
+  });
+  expectEq("Native Eq 3", 1, () -> {
+    native_eq(Array[1, 2], Array[1, 2, 3]);
+  });
+  expectEq("Native Eq 4", 0, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(1, 1), T(23, X(2, 2))])
+  });
+  expectEq("Native Eq 5", 1, () -> {
+    native_eq(Array[X(0, 1), T(23, X(2, 2))], Array[X(1, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 6", 1, () -> {
+    native_eq(Array[X(1, -1), T(23, X(2, 2))], Array[X(1, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 7", 1, () -> {
+    native_eq(Array[X(1, 1), T(-23, X(2, 2))], Array[X(1, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 8", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(-2, 2))], Array[X(1, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 9", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, -2))], Array[X(1, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 10", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(2, 1), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 11", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(1, 2), T(23, X(2, 2))]);
+  });
+  expectEq("Native Eq 12", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(1, 1), T(24, X(2, 2))]);
+  });
+  expectEq("Native Eq 13", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(1, 1), T(23, X(3, 2))]);
+  });
+  expectEq("Native Eq 14", 1, () -> {
+    native_eq(Array[X(1, 1), T(23, X(2, 2))], Array[X(1, 1), T(23, X(2, 3))]);
+  });
+  /*
+    cobj = CObjectContainer(makeCObject(), Array[makeCObject(), makeCObject()]);
+    icobj = intern(cobj);
+    expectEq("CObject interning - 1", UInt32::truncate(1), () ->
+      isCObject(icobj.i0)
+    );
+    expectEq("CObject interning - 2", UInt32::truncate(1), () ->
+      isCObject(icobj.i1[0])
+    );
+    expectEq("CObject interning - 3", UInt32::truncate(1), () ->
+      isCObject(icobj.i1[1])
+    );
+  */
+  mutable SKFS.Context{}
+}

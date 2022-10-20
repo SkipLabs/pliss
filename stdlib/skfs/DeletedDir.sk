@@ -1,0 +1,77 @@
+/*****************************************************************************/
+/* Place Holder when a dictionary is delted */
+/*****************************************************************************/
+module SKFS;
+
+class DeletedDir{time: Time, dirName: DirName} extends Dir {
+  fun incrRefCount(_context: mutable Context): void {
+    void
+  }
+  fun decrRefCount(_context: mutable Context): void {
+    void
+  }
+
+  static fun addDirtyReader(mutable Context, DirName, DirName, BaseName): void {
+    void
+  }
+  static fun updateDirtyReaders(mutable Context, Path): void {
+    void
+  }
+  fun isInput(): Bool {
+    false
+  }
+  fun reset(mutable Context): void {
+    void
+  }
+  fun getTime(): Time {
+    this.time
+  }
+  fun getArrayRaw(BaseName): Array<File> {
+    Array[]
+  }
+
+  fun getArray(mutable Context, BaseName): Array<File> {
+    Array[]
+  }
+
+  fun getIter(mutable Context, BaseName): mutable Iterator<File> {
+    mutable EmptyIterator()
+  }
+
+  fun writeEntry(mutable Context, Path, BaseName, Array<File>): this {
+    this
+  }
+
+  fun unsafeIterKeys((BaseName, Int) -> void): void {
+    void
+  }
+  fun keys(): SortedSet<BaseName> {
+    SortedSet[]
+  }
+  fun getDirName(): DirName {
+    this.dirName
+  }
+  fun getOld(DirName, BaseName): Array<BaseName> {
+    Array[]
+  }
+
+  fun updateNewDirs(
+    mutable Context,
+    BaseName,
+    SortedSet<DirName>,
+  ): (this, Vector<DirName>) {
+    (this, Vector[])
+  }
+  fun writeArray(mutable Context, BaseName, Array<File>): void {
+    void
+  }
+  fun write(mutable Context, BaseName, File): void {
+    void
+  }
+  fun remove(mutable Context, BaseName): void {
+    void
+  }
+  fun isDeleted(): Bool {
+    true
+  }
+}

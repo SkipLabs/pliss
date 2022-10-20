@@ -1,0 +1,33 @@
+module SKFSTest;
+
+@cpp_extern("SKIP_test_free_external_pointer")
+native fun testFreeEP(Int): void;
+
+@cpp_extern("SKIP_get_free_test_counter")
+native fun getFreeTestCounter(): Int;
+
+fun testExternalPointer(): mutable SKFS.Context {
+  gcontext = SKFS.Context{};
+
+  SKFS.runWithGc(gcontext, context ~> {
+    if (context.getGlobal("Count") is None()) {
+      context.setGlobal("Count", SKFS.IntFile(0));
+    };
+    round = SKFS.IntFile::fromFile(context.getGlobal("Count").fromSome()).value;
+    epointer = SKFS.ExternalPointer::create(round, testFreeEP);
+    testCounter = getFreeTestCounter();
+    expectEq("Call to free nbr " + round, round, () ->
+      if (round == 0) 0 else testCounter + 1
+    );
+    !round = round + 1;
+    context.setGlobal("Count", SKFS.IntFile(round));
+    context.setGlobal("Pointer", epointer);
+    context.update();
+    if (round == 10) {
+      SKFS.CStop(None())
+    } else {
+      SKFS.CContinue(None())
+    };
+  });
+  mutable SKFS.Context{}
+}

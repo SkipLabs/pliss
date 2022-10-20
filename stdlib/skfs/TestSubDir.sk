@@ -1,0 +1,135 @@
+module SKFSTest;
+
+fun testSubDir(): mutable SKFS.Context {
+  dataStr1 = Array[
+    (SKFS.IID(1), SKFS.StringFile("1")),
+    (SKFS.IID(2), SKFS.StringFile("2")),
+  ];
+  context = SKFS.run(context ~> {
+    dirStr1 = context.mkdir(
+      SKFS.StringFile::fromFile,
+      SKFS.DirName::create("/dirStr1/"),
+      false,
+      dataStr1,
+    );
+    dirSingle = context.mkdir(
+      SKFS.StringFile::fromFile,
+      SKFS.DirName::create("/dirSingle/"),
+      false,
+      Array[(SKFS.IID(0), SKFS.StringFile("0"))],
+    );
+    dir1 = dirStr1.map(
+      SKFS.IntFile::fromFile,
+      context,
+      SKFS.DirName::create("/dir1/"),
+      (v ~> SKFS.IntFile(v.value.toInt())),
+    );
+    _dir2 = dir1.contextWriterKeyMap(
+      SKFS.IntFile::fromFile,
+      context,
+      SKFS.DirName::create("/dir2/"),
+      (context, _writer, _key, v) ~> {
+        dirName = SKFS.DirName::create("/dir2/" + v.value + "/");
+        _ = dir1.map(SKFS.IntFile::fromFile, context, dirName, x ~> x);
+      },
+    );
+    dir3 = SKFS.LHandle::create(
+      SKFS.StringFile::fromFile,
+      context,
+      SKFS.DirName::create("/dir3/"),
+      (context, _self, key) ~> {
+        keyStr = key.toString();
+        dirName = SKFS.DirName::create("/dir3/" + keyStr + "/");
+        _ = dirStr1.map(SKFS.StringFile::fromFile, context, dirName, x ~> x);
+        Array[SKFS.StringFile(keyStr)]
+      },
+    );
+    _dir4 = dir1.contextWriterKeyMap(
+      SKFS.IntFile::fromFile,
+      context,
+      SKFS.DirName::create("/dir4/"),
+      (context, _writer, _, value) ~> {
+        v = dir3.get(context, SKFS.IID(value.value));
+        dirName = SKFS.DirName::create("/dir4/" + v.value + "/");
+        toAdd = dirSingle.get(context, SKFS.IID(0)).value;
+        _ = dir1.map(SKFS.IntFile::fromFile, context, dirName, x ~>
+          SKFS.IntFile(x.value + toAdd.toInt())
+        );
+      },
+    );
+  });
+  SKFSTest.expectPass("Testing subdir exists", () -> {
+    invariant(context.maybeGetDir(SKFS.DirName::create("/dir2/1/")) is Some _)
+  });
+  SKFSTest.expectPass("Testing lazy subdir exists", () -> {
+    invariant(context.maybeGetDir(SKFS.DirName::create("/dir3/1/")) is Some _)
+  });
+  inputDir = context.unsafeGetEagerDir(SKFS.DirName::create("/dirStr1/"));
+  inputSingle = context.unsafeGetEagerDir(SKFS.DirName::create("/dirSingle/"));
+  inputDir.writeArray(context, SKFS.IID(1), Array[SKFS.StringFile("23")]);
+  context.update();
+  SKFSTest.expectPass("Testing subdir has been removed", () -> {
+    context.maybeGetDir(SKFS.DirName::create("/dir2/1/")) match {
+    | None() if (context.reallyRemoveDir) -> void
+    | None() -> invariant_violation("Expected an empty directory, not None")
+    | Some(dir) -> invariant(dir is SKFS.DeletedDir _)
+    }
+  });
+  SKFSTest.expectPass("Testing lazy subdir has been removed", () -> {
+    context.maybeGetDir(SKFS.DirName::create("/dir3/1/")) match {
+    | None() if (context.reallyRemoveDir) -> void
+    | None() -> invariant_violation("Expected an empty directory, not None")
+    | Some(dir) -> invariant(dir is SKFS.DeletedDir _)
+    }
+  });
+  SKFSTest.expectPass("Testing new subdir exists", () -> {
+    invariant(context.maybeGetDir(SKFS.DirName::create("/dir2/23/")) is Some _)
+  });
+  SKFSTest.expectPass("Testing new lazy subdir exists", () -> {
+    invariant(context.maybeGetDir(SKFS.DirName::create("/dir3/23/")) is Some _)
+  });
+  inputDir.writeArray(context, SKFS.IID(255), Array[SKFS.StringFile("255")]);
+  context.update();
+  inputDir.writeArray(context, SKFS.IID(255), Array[SKFS.StringFile("255")]);
+  context.update();
+  inputSingle.writeArray(context, SKFS.IID(0), Array[SKFS.StringFile("1")]);
+  inputDir.writeArray(context, SKFS.IID(255), Array[SKFS.StringFile("255")]);
+  context.update();
+  context
+}
+
+fun testSubSubDirUnit(): mutable SKFS.Context {
+  context = SKFS.run(context ~> {
+    dir1 = context.mkdir(
+      SKFS.IntFile::fromFile,
+      SKFS.DirName::create("/dir1/"),
+      false,
+      Array[(SKFS.IID(0), SKFS.IntFile(0))],
+    );
+    dir2 = context.mkdir(
+      SKFS.IntFile::fromFile,
+      SKFS.DirName::create("/dir2/"),
+      false,
+      Array[(SKFS.IID(0), SKFS.IntFile(0))],
+    );
+    subDir2 = dir2.map(
+      SKFS.IntFile::fromFile,
+      context,
+      SKFS.DirName::create("/subDir2/"),
+      x ~> x + 1,
+    );
+    _ = dir1.contextMap(
+      SKFS.IntFile::fromFile,
+      context,
+      SKFS.DirName::create("/subDir1/"),
+      (context, x) ~> {
+        !x.value = x.value + subDir2.get(context, SKFS.IID(0)).value;
+        x
+      },
+    )
+  });
+  dir2 = context.unsafeGetEagerDir(SKFS.DirName::create("/dir2/"));
+  dir2.writeArray(context, SKFS.IID(0), Array[SKFS.IntFile(1)]);
+  context.update();
+  context
+}
