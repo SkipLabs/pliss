@@ -1,0 +1,16 @@
+CPP=clang++-12
+SKC=~/pliss/bin/skc
+OLEVEL=-O2
+FILES = $(shell ls *.sk)
+STDLIB = $(shell find -L stdlib/ -name '*.sk')
+
+build/bin: build/program.ll
+	mkdir -p build
+	$(CPP) $(OLEVEL) build/program.ll lib/libskip_runtime64.a -o build/bin -lrt -lpthread
+
+build/program.ll: $(STDLIB) $(FILES)
+	mkdir -p build
+	$(SKC) --preamble lib/preamble64.ll --embedded64 --export-function-as main=skip_main --output build/program.ll $(STDLIB) $(FILES)
+
+clean:
+	rm -Rf build

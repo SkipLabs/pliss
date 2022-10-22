@@ -1,7 +1,7 @@
 module SKFSTest;
 
 fun testLazy(): mutable SKFS.Context {
-  context = SKFS.run(context ~> {
+  context = SKFS.runTest(context ~> {
     dirInput = context.mkdir(
       SKFS.IntFile::fromFile,
       SKFS.DirName::create("/input/"),

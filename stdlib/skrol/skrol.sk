@@ -1,0 +1,63 @@
+module alias AP = ArgumentParser;
+
+module SKROL;
+
+const defaultSchema: Array<AP.Param> = Array[
+  AP.StringParam{name => "init", help => "Initializes a new data file"},
+  AP.StringParam{name => "data", help => "Loads an existing data file"},
+];
+
+fun getParsedArgs(schema: Array<AP.Param>): AP.ParseResult {
+  AP.parse(schema, arguments()) match {
+  | Success(value) -> value
+  | Failure(error) ->
+    print_error(error.getMessage());
+    skipExit(2)
+  }
+}
+
+@cpp_extern("SKIP_unsafe_set_local_context")
+native fun setLocalContext(mutable SKFS.Context): void;
+
+@cpp_extern("SKIP_unsafe_get_local_context")
+native fun getLocalContext(): mutable SKFS.Context;
+
+fun run(init: () ~> void): void {
+  argsSchema = defaultSchema;
+  parsedArgs = getParsedArgs(argsSchema);
+  argMap = parsedArgs.argumentValues;
+  if (parsedArgs.unknown.size() != 0) {
+    unknownOptions = parsedArgs.unknown.filter(x ->
+      x != "" && x.getIter().next() == Some('-')
+    );
+    for (option in unknownOptions) {
+      if (option != "--help") print_error("Unknown option: " + option);
+    };
+    if (unknownOptions.size() != 0) {
+      print_error(AP.help(argsSchema));
+      skipExit(2);
+    }
+  };
+  argFiles = parsedArgs.unknown.toArray();
+  if (argFiles.size() > 0) {
+    for (file in argFiles) {
+      print_error("Error: don't know what to do with " + file);
+    };
+    skipExit(2);
+  };
+  if (argMap.maybeGet("init") is Some(AP.StringValue _)) {
+    _ = SKFS.gContextInit(SKFS.Context{});
+    init();
+    return void;
+  };
+  if (SKFS.gHasContext() == 0) {
+    invariant(argMap.maybeGet("data") is Some(AP.MissingValue{}));
+    print_error("Error: option --data is missing");
+    skipExit(2);
+  };
+  SKFS.runWithGc(SKFS.gContextGet(), context ~> {
+    setLocalContext(context.mclone());
+    init();
+    SKFS.CStop(None())
+  })
+}

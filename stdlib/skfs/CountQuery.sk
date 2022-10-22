@@ -55,7 +55,7 @@ module end;
 module SKFSTest;
 
 fun testCount(): mutable SKFS.Context {
-  context = SKFS.run(context ~> {
+  context = SKFS.runTest(context ~> {
     inputFiles = SortedMap[
       SKFS.IID(0) => SKFS.StringFile("23"),
       SKFS.IID(1) => SKFS.StringFile("35"),

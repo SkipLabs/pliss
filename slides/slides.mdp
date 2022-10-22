@@ -1,0 +1,54 @@
+%title: Reactive programming in SKIP
+%author: Julien verlaguet (SkipLabs)
+%date: 2022-10-25
+
+-> # Welcome to PLISS 2022! <-
+
+About me:
+* The Hack guy
+* But also the SKIP guy! :)
+* CEO SkipLabs
+
+--------------------------------------------------
+-> # What is reactive programming? <-
+==============
+
+* Recompute only what changed
+* Can "watch" changes
+* Can be applied to anything
+
+--------------------------------------------------
+-> # DEMO: skdb <-
+==============
+
+--------------------------------------------------
+-> # DEMO: skgui <-
+==============
+
+-------------------------------------------------
+-> # Reactive programming? Streaming?  <-
+
+* Given a stream of updates, produce a view.
+* Forces you to think "backwards"
+* For example: a compiler.
+
+-------------------------------------------------
+-> # Reactive programming? Memoization?  <-
+
+* Save results that you already computed
+* You have to control effects
+* Problem: it's impossible to build an index
+
+
+-------------------------------------------------
+-> # Reactive programming? SKFS!  <-
+
+* A reactive file system
+* Well known abstractions
+* Can accomodate eager/lazy
+
+-------------------------------------------------
+
+-> # Conclusion  <-
+
+mdp supports *other* **formatting**, too. Give it a try!

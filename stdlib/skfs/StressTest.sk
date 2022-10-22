@@ -641,7 +641,7 @@ fun testStress(): mutable SKFS.Context {
     };
     if (context.debugMode) print_string("Running program from scratch");
     newProg = prog;
-    context2 = SKFS.run(context ~> {
+    context2 = SKFS.runTest(context ~> {
       eval(context, newProg);
     });
     if (context.debugMode) {

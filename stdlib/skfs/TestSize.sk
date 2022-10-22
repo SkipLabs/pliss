@@ -1,7 +1,7 @@
 module SKFSTest;
 
 fun testSize(): mutable SKFS.Context {
-  context = SKFS.run(context ~> {
+  context = SKFS.runTest(context ~> {
     dirSInput = context.mkdir(
       SKFS.StringFile::fromFile,
       SKFS.DirName::create("/sinput/"),

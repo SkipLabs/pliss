@@ -532,7 +532,7 @@ fun makeTrees(acc: mutable Vector<Def>, size: Int): void {
 }
 
 fun testOldLazy(): mutable SKFS.Context {
-  SKFS.run(context ~> {
+  SKFS.runTest(context ~> {
     acc = mutable Vector[];
     makeTrees(acc, 3);
     inputData = acc
@@ -587,7 +587,7 @@ fun testOldLazy(): mutable SKFS.Context {
 }
 
 fun testOld(): mutable SKFS.Context {
-  SKFS.run(context ~> {
+  SKFS.runTest(context ~> {
     acc = mutable Vector[];
     makeTrees(acc, 3);
     inputData = acc
@@ -618,7 +618,7 @@ fun testSearch(): mutable SKFS.Context {
     Page{id => 1, text => "hello world"},
     Page{id => 2, text => "hello"},
   ].map(x -> (SKFS.IID(x.id), x));
-  SKFS.run(context ~> {
+  SKFS.runTest(context ~> {
     pages = context.mkdir(
       Page::fromFile,
       SKFS.DirName::create("/pages/"),

@@ -30,7 +30,7 @@ fun testWikipedia(path: String): mutable SKFS.Context {
     })
     .toArray();
   debug("Loaded the files");
-  SKFS.run(context ~> {
+  SKFS.runTest(context ~> {
     pages = context.mkdir(
       WikiPage::fromFile,
       SKFS.DirName::create("/input/"),

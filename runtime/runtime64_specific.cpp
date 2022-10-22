@@ -355,4 +355,31 @@ int64_t SKIP_get_mtime(char *path) {
 void SKIP_exit(uint64_t code) {
   exit(code);
 }
+
+char* SKIP_read_file(char* filename_obj) {
+ size_t filename_size = SKIP_String_byteSize(filename_obj);
+ char* filename = (char*)malloc(filename_size+1);
+ memcpy(filename, filename_obj, filename_size);
+ filename[filename_size] = (char)0;
+
+ FILE *f = fopen(filename, "rb");
+ if(f == NULL) {
+   fprintf(stderr, "Could not open file: %s\n", filename);
+   exit(2);
+ }
+ fseek(f, 0, SEEK_END);
+ long file_size = ftell(f);
+ fseek(f, 0, SEEK_SET);
+
+ char *buffer = (char*)malloc(file_size + 1);
+ fread(buffer, file_size, 1, f);
+ fclose(f);
+
+ char* result = sk_string_create(buffer, file_size);
+ free(filename);
+ free(buffer);
+ return result;
+
+}
+
 }

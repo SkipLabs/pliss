@@ -55,10 +55,10 @@ value class ArrowKey(
 ) uses Orderable
 
 /*****************************************************************************/
-/* The function used to start the system. */
+/* The function used to start the system for tests. */
 /*****************************************************************************/
 
-fun run(f: (mutable Context) -> void): mutable Context {
+fun runTest(f: (mutable Context) -> void): mutable Context {
   context = mutable Context{};
   f(context);
   context.initPre();
@@ -1410,6 +1410,51 @@ fun withRegion<T>(
   (icontext, copiedResult) = copied.getHead();
   context.replaceFromSaved(icontext);
   copiedResult
+}
+
+@cpp_extern("SKIP_read_file")
+native fun readFile(String): String;
+
+fun run<T>(
+  init: (mutable Context, EHandle<StringFile>) ~> void,
+  always: mutable Context ~> void,
+): void {
+  gcontext = SKFS.Context{failOnExn => true};
+  if (arguments().any(x -> x == "--init")) {
+    _ = SKFS.gContextInit(gcontext);
+  };
+  fileNames = mutable Vector[];
+  vtry(
+    () -> {
+      loop {
+        fileNames.push(read_line());
+      }
+    },
+    exn -> {
+      invariant(exn is EndOfFile _);
+    },
+  );
+  frozenFileNames = fileNames.chill();
+  SKFS.runWithGc(gcontext, context ~> {
+    srcDirName = SKFS.DirName::create("/src/");
+    isInit = context.unsafeMaybeGetEagerDir(srcDirName) is None();
+    if (isInit) {
+      srcDir = context.mkdir(SKFS.StringFile::fromFile, srcDirName, false);
+      for (fileName in frozenFileNames) {
+        fileContent = readFile(fileName);
+        srcDir.writeArray(
+          context,
+          SKFS.SID(fileName),
+          Array[SKFS.StringFile(fileContent)],
+        );
+      };
+      init(context, srcDir);
+    };
+    context.update();
+    always(context);
+
+    SKFS.CStop(None())
+  });
 }
 
 module end;

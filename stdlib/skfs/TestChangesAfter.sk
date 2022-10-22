@@ -6,7 +6,7 @@ module SKFSTest;
 
 fun testChangesAfter(): mutable SKFS.Context {
   dirName = SKFS.DirName::create("/sinput/");
-  context = SKFS.run(context ~> {
+  context = SKFS.runTest(context ~> {
     _ = context.mkdir(
       SKFS.StringFile::fromFile,
       dirName,
