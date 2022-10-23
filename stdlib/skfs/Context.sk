@@ -1438,17 +1438,20 @@ fun run<T>(
   SKFS.runWithGc(gcontext, context ~> {
     srcDirName = SKFS.DirName::create("/src/");
     isInit = context.unsafeMaybeGetEagerDir(srcDirName) is None();
-    if (isInit) {
+    srcDir = if (isInit) {
       srcDir = context.mkdir(SKFS.StringFile::fromFile, srcDirName, false);
-      for (fileName in frozenFileNames) {
-        fileContent = readFile(fileName);
-        srcDir.writeArray(
-          context,
-          SKFS.SID(fileName),
-          Array[SKFS.StringFile(fileContent)],
-        );
-      };
       init(context, srcDir);
+      srcDir
+    } else {
+      SKFS.EHandle(SKFS.StringFile::fromFile, srcDirName)
+    };
+    for (fileName in frozenFileNames) {
+      fileContent = readFile(fileName);
+      srcDir.writeArray(
+        context,
+        SKFS.SID(fileName),
+        Array[SKFS.StringFile(fileContent)],
+      );
     };
     context.update();
     always(context);

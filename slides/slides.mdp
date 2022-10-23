@@ -4,7 +4,9 @@
 
 -> # Welcome to PLISS 2022! <-
 
-About me:
+--------------------------------------------------
+-> # About me! <-
+
 * The Hack guy
 * But also the SKIP guy! :)
 * CEO SkipLabs
@@ -48,6 +50,168 @@ About me:
 * Can accomodate eager/lazy
 
 -------------------------------------------------
+-> # SKFS  <-
+
+* Let's try it!
+* git clone https://github.com/SkipLabs/pliss.git
+
+-------------------------------------------------
+-> # SKFS  <-
+
+* cd pliss
+* make
+* Sorry for the mess \_O_/
+
+-------------------------------------------------
+-> # A first example  <-
+
+* Adding numbers reactively
+* Not super interesting ...
+* ... but you have to start somewhere.
+
+-------------------------------------------------
+-> # Code  <-
+
+-------------------------------------------------
+-> # Why a new language?  <-
+
+* We need strong static guarantees
+* Existing languages don't have them
+* Can we add them to an existing language?
+
+-------------------------------------------------
+-> # Add immutability guarantees to a language <-
+
+* You could but that defies the purpose
+* Incompatible with the rest of the language
+
+-------------------------------------------------
+-> # A new language? Good news! <-
+
+* We can have a new memory model
+* We can have safe parallelism
+* And of course, we can have reactivity
+
+-------------------------------------------------
+-> # What is SKIP? <-
+
+* Skip is immutable by default
+* Skip makes mutability explicit
+* Powerful type-system with implicit sub-typing.
+
+-------------------------------------------------
+-> # Why? <-
+
+* Objects get in/out of caches without a copy
+* Predictable GC pause time
+* Safe parallelism
+
+-------------------------------------------------
+-> # Skip TS challenges <-
+
+* Mutability should not be able to hide
+* We have a problem with closures
+* We have a problem with generics
+
+-------------------------------------------------
+-> # Explicit mutability means ... <-
+
+* For any given type ...
+* If it does not contain the keyword mutable ...
+* ... It's immutable!
+
+-------------------------------------------------
+-> # Closures <-
+
+* Problem: closures can hide mutable objects
+* Solution, two kind of closures: ~> and ->
+* One is subtype of the other
+
+-------------------------------------------------
+-> # Generics <-
+
+* Let's say I have B<T> (T is generic)
+* And call a function expecting A (no generic)
+* The T was able to hide!
+
+-------------------------------------------------
+-> # Generics <-
+
+* Should B<T> be subtype of A
+* Yes, if T is immutable
+* No otherwise
+
+-------------------------------------------------
+-> # Mutability preservation <-
+
+* Subtyping introduces constraint on existentials
+* To enforce immutable generics, T: frozen
+
+-------------------------------------------------
+-> # Well known memory models <-
+
+* Malloc/free
+* Reference counter
+* Tracing GC
+
+-------------------------------------------------
+-> # Tracing GC <-
+
+* Forced to scan the whole heap
+* Solution? Generations
+* Problem: escape analysis is not precise.
+
+-------------------------------------------------
+-> # Tracing GC <-
+
+* Tracing GC are great for programers
+* But ... the GC time is unpredictable
+* Not in SKIP!
+
+-------------------------------------------------
+-> # SKIP memory model: what are regions? <-
+
+* Regions are a stack of heaps
+* The last region is POPed on exit
+* Requires an liveness analysis
+
+-------------------------------------------------
+-> # SKIP memory model <-
+
+* What if we could GC regions
+* We first copy things out and then POP
+* We can GC at the function level!
+
+
+-------------------------------------------------
+-> # SKIP memory model <-
+
+* What about the top region?
+* The top regions are reference counted
+* These are the objects living in SKFS
+
+-------------------------------------------------
+-> # SKIP memory model <-
+
+* The heap is immutable
+* Updates produce a new heap
+* Gives us MVCC for free :)
+
+-------------------------------------------------
+-> # SKIP parallelism <-
+
+* Immutability makes split/join safe
+* Gives us parallelism for free
+
+-------------------------------------------------
+-> # SKIP reactivity <-
+
+* Immutability guarantees that caches are safe
+* The runtime tracks dependencies
+
+-------------------------------------------------
+
+
 
 -> # Conclusion  <-
 

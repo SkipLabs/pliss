@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+const sumDirName: SKFS.DirName = SKFS.DirName::create("/sum/");
+
 fun main(): void {
   SKFS.run(
     (context, srcDir) ~> {
@@ -32,3 +34,64 @@ fun main(): void {
     },
   )
 }
+
+/*
+// Putting that here just in case I get lost in my presentation
+fun main(): void {
+  SKFS.run(
+    (context, srcDir) ~> {
+      integersDirName = SKFS.DirName::create("/integers/");
+      integersDir = srcDir.contextWriterKeyValues(
+        SKFS.IntFile::fromFile,
+        context,
+        integersDirName,
+        (_context, writer, key, values) ~> {
+          writer.write(
+            key,
+            SKFS.IntFile(
+              values[0].value.toIntOption() match {
+              | None() -> -1
+              | Some(x) -> x
+              },
+            ),
+          )
+        },
+      );
+      _ = integersDir.contextWriterKeyValues(
+        SKFS.IntFile::fromFile,
+        context,
+        sumDirName,
+        (_context, writer, _key, values) ~> {
+          writer.writeArray(SKFS.IID(0), values);
+        },
+        Some(
+          SKFS.EReducer{
+            canReset => false,
+            init => values ~> {
+              Array[
+                SKFS.IntFile(
+                  values.reduce((acc, intFile) ~> acc + intFile.value, 0),
+                ),
+              ]
+            },
+            update => (state, toRemove, toAdd) ~> {
+              value = state[0].value;
+              for (intFile in toRemove) {
+                !value = value - intFile.value;
+              };
+              for (intFile in toAdd) {
+                !value = value + intFile.value;
+              };
+              Some(Array[SKFS.IntFile(value)])
+            },
+          },
+        ),
+      );
+    },
+    context ~> {
+      sumDir = SKFS.EHandle(SKFS.IntFile::fromFile, sumDirName);
+      debug(("SUM", sumDir.getArray(context, SKFS.IID(0))));
+    },
+  )
+}
+*/
