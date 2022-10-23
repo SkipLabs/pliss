@@ -40,8 +40,29 @@ You can run it using:
 $ echo "path/to/source/file" | ./build/mini_skip
 ```
 
-The easiest thing to do if you want to try things is just to modify
-the files in mini_skip to try things out.
+To run things "reactively", in other words, for skip to only recompute
+what changed. You should run the following: 
+
+```
+$ echo "path/to/source/file" | ./build/mini_skip --init /path/to/state
+```
+
+The file path/to/state will then contain the internal state of SKFS.
+And then, after every change, run the following:
+
+```
+$ echo "path/to/source/file" | ./build/mini_skip --data /path/to/state
+```
+
+That way, SKFS will only recompute what changed between the last run
+and the moment when it's called.
+
+The same pattern will work with any SKIP program using SKFS.
+You first initialize the state with --init, and then run the same
+command with --data to update incrementally. 
+
+Finally, the easiest thing to do if you want to play is just to modify
+the files in mini_skip/.
 So for example, in mini_skip/main.sk, try commenting the main source
 code and replace it with
 
