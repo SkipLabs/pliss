@@ -12,6 +12,14 @@
 * CEO SkipLabs
 
 --------------------------------------------------
+-> # What is SKIP? <-
+==============
+
+* A programming language for reactive programming
+* Statically typed
+* Generates native code (and wasm)
+
+--------------------------------------------------
 -> # What is reactive programming? <-
 ==============
 
@@ -27,6 +35,10 @@
 -> # DEMO: skgui <-
 ==============
 
+--------------------------------------------------
+-> # DEMO: skml <-
+==============
+
 -------------------------------------------------
 -> # Reactive programming? Streaming?  <-
 
@@ -40,7 +52,6 @@
 * Save results that you already computed
 * You have to control effects
 * Problem: it's impossible to build an index
-
 
 -------------------------------------------------
 -> # Reactive programming? SKFS!  <-
@@ -148,6 +159,9 @@
 * To enforce immutable generics, T: frozen
 
 -------------------------------------------------
+-> # Let's talk about memory! <-
+
+-------------------------------------------------
 -> # Well known memory models <-
 
 * Malloc/free
@@ -210,9 +224,27 @@
 * The runtime tracks dependencies
 
 -------------------------------------------------
+-> # Skip type inference <-
+
+* Instead of accumulating contraints
+* Turn the sub-typing into an algebra
+* Why? Better error messages.
+
+-------------------------------------------------
+-> # The problem with implicit subtyping <-
+
+* 'a <= 'b && 'b <- Int
+* I can deduce by transitivity that 'a is an Int
+* The problems is to tie that back to the AST
+
+-------------------------------------------------
+-> # Solution: don't write constraints <-
+
+* Instead of writing 'a <= 'b
+* write: + {..., 'a} JOIN - {..., 'b}
+* It's easy to tie to the ast.
 
 
+-------------------------------------------------
+-> # Thank you!  <-
 
--> # Conclusion  <-
-
-mdp supports *other* **formatting**, too. Give it a try!
