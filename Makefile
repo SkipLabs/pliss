@@ -1,7 +1,7 @@
 CC=clang
 CPP=clang++
 BCLINK=llvm-link
-OLEVEL=-O1
+OLEVEL=-O2
 CC64FLAGS=$(OLEVEL) -DSKIP64 -fPIC
 
 CFILES=\
@@ -31,7 +31,7 @@ MINI_SKIP_FILES=$(shell find mini_skip/ -name '*.sk')
 default: build/mini_skip
 
 build/mini_skip: build/miniskip64.ll lib/libskip_runtime64.a
-	$(CPP) $(OLEVEL) build/miniskip64.ll lib/libskip_runtime64.a -o build/mini_skip -lrt -lpthread
+	$(CPP) -no-pie $(OLEVEL) build/miniskip64.ll lib/libskip_runtime64.a -o build/mini_skip -lrt -lpthread
 
 build/miniskip64.ll: bin/skc build/state.data $(STDLIB_FILES) $(MINI_SKIP_FILES)
 	mkdir -p build/
@@ -44,7 +44,7 @@ build/state.data: bin/skc
 
 bin/skc: lib/libskip_runtime64.a
 	mkdir -p bin/
-	$(CPP) -no-pie $(OLEVEL) compiler/preamble_and_out64.ll lib/libskip_runtime64.a -o bin/skc -lrt -lpthread
+	$(CPP) -no-pie -O1 compiler/preamble_and_out64.ll lib/libskip_runtime64.a -o bin/skc -lrt -lpthread
 
 build/magic.h:
 	echo -n "#define MAGIC " > build/magic.h
