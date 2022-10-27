@@ -96,6 +96,7 @@ char* sk_new_const(char* cst) {
 
 void sk_persist_consts() {
   if((*pconsts) != NULL) return;
+  if(mconsts_count == 0) return;
   sk_global_lock();
   *pconsts = (void**)sk_palloc(mconsts_count * sizeof(void*));
   memcpy(*pconsts, mconsts, mconsts_count * sizeof(void*));

@@ -1,7 +1,7 @@
-CC=clang-12
-CPP=clang++-12
-BCLINK=llvm-link-12
-OLEVEL=-O2
+CC=clang
+CPP=clang++
+BCLINK=llvm-link
+OLEVEL=-O1
 CC64FLAGS=$(OLEVEL) -DSKIP64 -fPIC
 
 CFILES=\
@@ -44,7 +44,7 @@ build/state.data: bin/skc
 
 bin/skc: lib/libskip_runtime64.a
 	mkdir -p bin/
-	$(CPP) $(OLEVEL) compiler/preamble_and_out64.ll lib/libskip_runtime64.a -o bin/skc -lrt -lpthread
+	$(CPP) -no-pie $(OLEVEL) compiler/preamble_and_out64.ll lib/libskip_runtime64.a -o bin/skc -lrt -lpthread
 
 build/magic.h:
 	echo -n "#define MAGIC " > build/magic.h
