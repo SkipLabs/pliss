@@ -33,14 +33,9 @@ default: build/mini_skip
 build/mini_skip: build/miniskip64.ll lib/libskip_runtime64.a
 	$(CPP) -no-pie $(OLEVEL) build/miniskip64.ll lib/libskip_runtime64.a -o build/mini_skip -lrt -lpthread
 
-build/miniskip64.ll: bin/skc build/state.data $(STDLIB_FILES) $(MINI_SKIP_FILES)
+build/miniskip64.ll: bin/skc $(STDLIB_FILES) $(MINI_SKIP_FILES)
 	mkdir -p build/
-	bin/skc --preamble ./preamble64.ll --embedded64 --export-function-as main=skip_main $(STDLIB_FILES) $(MINI_SKIP_FILES) --output build/miniskip64.ll --data build/state.data
-
-build/state.data: bin/skc
-	mkdir -p build/
-	rm -f build/state.db
-	bin/skc --preamble ./preamble64.ll --embedded64 --export-function-as main=skip_main $(STDLIB_FILES) $(MINI_SKIP_FILES) --output build/miniskip64.ll --init build/state.data
+	bin/skc --preamble ./preamble64.ll --embedded64 --export-function-as main=skip_main $(STDLIB_FILES) $(MINI_SKIP_FILES) --output build/miniskip64.ll
 
 bin/skc: lib/libskip_runtime64.a
 	mkdir -p bin/
